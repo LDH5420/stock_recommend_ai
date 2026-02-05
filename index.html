@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI 가치투자 분석 대시보드 - Maximum Stability</title>
+    <title>AI 가치투자 분석 대시보드 - 공공데이터 정식 규격</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
@@ -15,274 +15,231 @@
         .sidebar-item:hover { transform: translateX(4px); border-left-color: #3b82f6; background-color: #f1f5f9; }
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        .api-badge { font-size: 9px; padding: 2px 6px; border-radius: 4px; font-weight: 800; }
         .loading-shimmer { background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
         @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        #tv_chart_container { height: 500px; width: 100%; }
     </style>
 </head>
 <body class="min-h-screen">
 
-    <div class="max-w-[1440px] mx-auto p-4 lg:p-6">
-        <header class="flex flex-col lg:flex-row justify-between items-center mb-6 bg-white p-6 rounded-3xl shadow-sm border border-slate-100 gap-4">
-            <div class="flex items-center gap-4">
-                <div class="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-indigo-200">
-                    <i class="fa-solid fa-microchip text-xl"></i>
+    <div class="w-full px-4 py-4 md:py-6">
+        <!-- Header -->
+        <header class="flex flex-col lg:flex-row justify-between items-center mb-6 bg-white p-4 md:p-6 rounded-2xl md:rounded-3xl shadow-sm border border-slate-100 gap-4">
+            <div class="flex items-center gap-3 md:gap-4 w-full lg:w-auto">
+                <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg">
+                    <i class="fa-solid fa-microchip text-lg"></i>
                 </div>
                 <div>
-                    <h1 class="text-2xl font-black text-slate-800 tracking-tight">QUANT AI PRO</h1>
-                    <div class="flex gap-2 items-center">
-                        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Maximum Stability Mode</p>
-                        <span class="api-badge bg-green-100 text-green-600">PRICE</span>
-                        <span class="api-badge bg-purple-100 text-purple-600">ISSUE</span>
-                        <span class="api-badge bg-blue-100 text-blue-600">FINANCE</span>
-                    </div>
+                    <h1 class="text-xl md:text-2xl font-black text-slate-800 tracking-tight">QUANT AI PRO</h1>
+                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Financial Data Services v2.0</p>
                 </div>
             </div>
 
-            <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
-                <div class="relative">
-                    <input type="password" id="apiKey" oninput="saveConfig()" placeholder="인증키를 입력하세요" 
-                        class="w-full lg:w-80 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-500 transition-all">
-                    <i class="fa-solid fa-key absolute right-4 top-3.5 text-slate-300"></i>
+            <div class="flex flex-col sm:flex-row gap-2 w-full lg:w-auto">
+                <div class="relative flex-1 sm:flex-none">
+                    <input type="text" id="apiKey" oninput="saveConfig()" placeholder="공공데이터포털 일반 인증키(Encoding) 입력" 
+                        class="w-full lg:w-96 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500 transition-all">
                 </div>
-                <button onclick="fetchAllData()" class="bg-indigo-600 text-white px-6 py-2.5 rounded-xl font-bold hover:bg-indigo-700 transition-all flex items-center justify-center gap-2 shadow-lg shadow-indigo-200">
-                    <i class="fa-solid fa-bolt"></i> 분석 시작
+                <button onclick="fetchAllData()" class="bg-indigo-600 text-white px-8 py-2 rounded-xl font-bold hover:bg-indigo-700 transition-all flex items-center justify-center gap-2 shadow-lg active:scale-95">
+                    <i class="fa-solid fa-bolt"></i> <span>분석 시작</span>
                 </button>
             </div>
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            <aside class="lg:col-span-3 space-y-4">
-                <div class="glass-card rounded-3xl p-5 shadow-sm">
-                    <div class="flex items-center justify-between mb-5 px-1">
-                        <h2 class="font-black text-slate-800 italic uppercase text-sm">Market Watch</h2>
-                        <span id="updateStatus" class="text-[10px] bg-slate-100 px-2 py-1 rounded text-slate-400 font-bold uppercase tracking-tighter">Ready</span>
+            <!-- Sidebar -->
+            <aside class="lg:col-span-3 order-2 lg:order-1">
+                <div class="glass-card rounded-2xl p-5 shadow-sm sticky top-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="font-black text-slate-800 text-xs tracking-widest text-indigo-600 uppercase">Watchlist</h2>
+                        <span id="updateStatus" class="text-[10px] bg-slate-100 px-2 py-1 rounded text-slate-400 font-bold">IDLE</span>
                     </div>
-                    <div id="stockList" class="space-y-2 max-h-[calc(100vh-320px)] overflow-y-auto custom-scrollbar">
-                        <p class="text-[11px] text-slate-400 text-center py-10 italic">상단 버튼을 클릭하여 데이터를 호출하세요.</p>
+                    <div id="stockList" class="space-y-2 max-h-[calc(100vh-250px)] overflow-y-auto custom-scrollbar">
+                        <div class="text-center py-20 opacity-20 italic text-xs">Awaiting Analysis...</div>
                     </div>
                 </div>
             </aside>
 
-            <main class="lg:col-span-9">
-                <div id="dashboardContent" class="hidden space-y-6">
+            <!-- Main Content -->
+            <main class="lg:col-span-9 order-1 lg:order-2">
+                <div id="dashboardContent" class="hidden space-y-6 animate-in fade-in duration-500">
                     <div class="glass-card rounded-3xl p-8 shadow-sm border-b-8 border-indigo-600">
-                        <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
                             <div>
                                 <div class="flex items-center gap-2">
-                                    <h2 id="targetName" class="text-5xl font-black text-slate-900 tracking-tighter">---</h2>
-                                    <span id="marketTag" class="bg-slate-900 text-white text-[10px] px-2 py-1 rounded-md font-bold mt-2">KOSPI</span>
+                                    <h2 id="targetName" class="text-4xl md:text-6xl font-black text-slate-900 tracking-tighter">---</h2>
+                                    <span id="marketTag" class="bg-slate-900 text-white text-[10px] px-2 py-1 rounded-md font-bold uppercase">MARKET</span>
                                 </div>
-                                <p id="targetCode" class="text-2xl font-mono text-slate-300 mt-2">------</p>
+                                <p id="targetCode" class="text-xl md:text-2xl font-mono text-slate-300 mt-2">------</p>
                             </div>
-                            <div class="text-right">
-                                <div class="flex items-baseline justify-end gap-2">
-                                    <span id="targetPrice" class="text-5xl font-black text-slate-900">---</span>
+                            <div class="text-left md:text-right w-full md:w-auto">
+                                <div class="flex items-baseline justify-start md:justify-end gap-2">
+                                    <span id="targetPrice" class="text-4xl md:text-6xl font-black text-slate-900">---</span>
                                     <span class="text-xl font-bold text-slate-400">KRW</span>
                                 </div>
-                                <div id="priceChange" class="text-lg font-bold mt-2">--</div>
+                                <div id="priceChange" class="text-xl font-bold mt-1">--</div>
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-10">
-                            <div class="bg-slate-50 p-5 rounded-2xl">
-                                <p class="text-[11px] font-black text-slate-400 uppercase mb-2">시가총액</p>
+                        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-10">
+                            <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100">
+                                <p class="text-[11px] font-black text-slate-400 uppercase mb-2 tracking-widest">시가총액</p>
                                 <p id="valMarketCap" class="text-xl font-black text-slate-800">--</p>
                             </div>
-                            <div class="bg-slate-50 p-5 rounded-2xl">
-                                <p class="text-[11px] font-black text-slate-400 uppercase mb-2">PER</p>
+                            <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100">
+                                <p class="text-[11px] font-black text-slate-400 uppercase mb-2 tracking-widest">PER (추정)</p>
                                 <p id="valPer" class="text-2xl font-black text-slate-800">--</p>
                             </div>
-                            <div class="bg-slate-50 p-5 rounded-2xl">
-                                <p class="text-[11px] font-black text-slate-400 uppercase mb-2">PBR</p>
+                            <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100">
+                                <p class="text-[11px] font-black text-slate-400 uppercase mb-2 tracking-widest">PBR (추정)</p>
                                 <p id="valPbr" class="text-2xl font-black text-slate-800">--</p>
                             </div>
-                            <div class="bg-slate-50 p-5 rounded-2xl">
-                                <p class="text-[11px] font-black text-slate-400 uppercase mb-2">ROE</p>
+                            <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100">
+                                <p class="text-[11px] font-black text-slate-400 uppercase mb-2 tracking-widest">ROE (%)</p>
                                 <p id="valRoe" class="text-2xl font-black text-slate-800">--</p>
                             </div>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                        <div class="glass-card rounded-3xl p-6 shadow-sm">
+                    <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
+                        <div class="xl:col-span-4 glass-card rounded-3xl p-6 shadow-sm">
                             <h3 class="font-black text-slate-800 mb-4 flex items-center gap-2 text-sm uppercase tracking-wider">
-                                <i class="fa-solid fa-robot text-indigo-600"></i> AI Smart Analysis
+                                <i class="fa-solid fa-robot text-indigo-600"></i> AI Analyst Insight
                             </h3>
-                            <div id="aiAnalysis" class="bg-slate-900 text-slate-300 p-6 rounded-2xl text-sm min-h-[220px] leading-relaxed font-light">
-                                분석 데이터를 집계하고 있습니다...
+                            <div id="aiAnalysis" class="bg-slate-900 text-slate-300 p-6 rounded-2xl text-sm leading-relaxed min-h-[300px] shadow-inner font-light">
+                                데이터를 집계 중입니다...
                             </div>
                         </div>
-                        <div class="glass-card rounded-3xl overflow-hidden shadow-sm h-[400px] border border-slate-100">
-                            <div id="tv_chart_container" class="w-full h-full"></div>
+                        <div class="xl:col-span-8 glass-card rounded-3xl overflow-hidden shadow-sm border border-slate-100 bg-white">
+                            <div id="tv_chart_container"></div>
                         </div>
                     </div>
                 </div>
 
-                <div id="welcomeState" class="glass-card rounded-[40px] p-24 text-center border-2 border-dashed border-slate-200 bg-slate-50/30">
-                    <div id="welcomeIcon" class="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                        <i class="fa-solid fa-satellite-dish text-2xl"></i>
+                <div id="welcomeState" class="glass-card rounded-[50px] p-20 md:p-32 text-center border-2 border-dashed border-slate-200 bg-slate-50/50">
+                    <div class="w-24 h-24 bg-white shadow-xl text-indigo-600 rounded-3xl flex items-center justify-center mx-auto mb-8 transform -rotate-6">
+                        <i class="fa-solid fa-magnifying-glass-chart text-4xl"></i>
                     </div>
-                    <h2 id="welcomeTitle" class="text-2xl font-black text-slate-800 tracking-tight">READY TO ANALYZE</h2>
-                    <p id="welcomeDesc" class="text-slate-400 mt-2 text-sm max-w-xs mx-auto">프록시 부하를 최소화하기 위해 순차적으로 데이터를 수집합니다.</p>
+                    <h2 class="text-4xl font-black text-slate-800 tracking-tighter uppercase mb-4 italic">READY TO ANALYZE</h2>
+                    <p class="text-slate-400 text-lg max-w-lg mx-auto leading-relaxed font-medium">
+                        금융위원회 오픈 API 가이드 규격에 맞춰 데이터를 수집합니다.<br>
+                        인증키를 입력하고 <span class="text-indigo-600 font-bold underline cursor-pointer" onclick="fetchAllData()">분석 시작</span>을 누르세요.
+                    </p>
                 </div>
             </main>
         </div>
     </div>
 
     <script>
-        const DEFAULT_API_KEY = "2db2dba281276dd9f0659bb600b146efb1d34209373643a97c2c71437e72cc7c";
-
         const watchlist = [
             { name: "삼성전자", code: "005930" },
             { name: "SK하이닉스", code: "000660" },
             { name: "현대차", code: "005380" },
             { name: "KB금융", code: "105560" },
             { name: "NAVER", code: "035420" },
-            { name: "셀트리온", code: "068270" }
+            { name: "셀트리온", code: "068270" },
+            { name: "기아", code: "000270" },
+            { name: "신한지주", code: "055550" }
         ];
 
-        // 가용한 프록시 리스트 (안정성 높은 순)
+        // 프록시 설정
         const proxyGenerators = [
-            (url) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
             (url) => `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
-            (url) => `https://thingproxy.freeboard.io/fetch/${url}`
+            (url) => `https://corsproxy.io/?${encodeURIComponent(url)}`
         ];
 
         function saveConfig() {
-            localStorage.setItem('krx_api_key_v2', document.getElementById('apiKey').value.trim());
+            localStorage.setItem('krx_api_key_v3', document.getElementById('apiKey').value.trim());
         }
 
         const sleep = (ms) => new Promise(res => setTimeout(res, ms));
 
-        /**
-         * 안정성 극대화를 위한 fetch 로직
-         */
-        async function fetchWithProxyFailover(url) {
-            let lastError = null;
-
-            for (let i = 0; i < proxyGenerators.length; i++) {
-                // 프록시 서버별로 최대 2번 시도
-                for (let attempt = 0; attempt < 2; attempt++) {
-                    try {
-                        const proxyUrl = proxyGenerators[i](url);
-                        
-                        // 타임아웃을 20초로 연장
-                        const controller = new AbortController();
-                        const timeoutId = setTimeout(() => controller.abort(), 20000);
-                        
-                        const response = await fetch(proxyUrl, { 
-                            signal: controller.signal,
-                            // 캐시를 방지하여 최신 데이터 강제
-                            cache: 'no-store'
-                        });
-                        clearTimeout(timeoutId);
-
-                        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                        
-                        const data = await response.json();
-                        let finalData = data.contents || data;
-
-                        if (typeof finalData === 'string') {
-                            try {
-                                finalData = JSON.parse(finalData);
-                            } catch (e) {
-                                // 문자열이 JSON이 아닌 경우 (에러 메시지 등)
-                                if (finalData.includes("API") || finalData.includes("Error")) {
-                                    throw new Error(`API Return Error: ${finalData.substring(0, 50)}`);
-                                }
-                                throw new Error("Invalid String Response");
-                            }
-                        }
-
-                        // 공공데이터포털 내부 에러 체크
-                        if (finalData?.response?.header?.resultCode && finalData.response.header.resultCode !== "00") {
-                            throw new Error(`Public API Error: ${finalData.response.header.resultMsg}`);
-                        }
-
-                        return finalData;
-                    } catch (err) {
-                        lastError = err;
-                        console.warn(`Proxy ${i} (Attempt ${attempt}) failed for ${url.split('itmsNm=')[1] || 'URL'}: ${err.message}`);
-                        // 실패 시 지수 백오프 대기
-                        await sleep(1000 * (attempt + 1));
+        async function fetchWithProxy(url) {
+            for (const proxyGen of proxyGenerators) {
+                try {
+                    const response = await fetch(proxyGen(url));
+                    if (!response.ok) continue;
+                    const data = await response.json();
+                    let content = data.contents || data;
+                    if (typeof content === 'string') content = JSON.parse(content);
+                    
+                    // 공공데이터 특유의 에러 체크 (00이 아니면 에러)
+                    if (content?.response?.header?.resultCode && content.response.header.resultCode !== "00") {
+                        console.error("API Error:", content.response.header.resultMsg);
+                        continue;
                     }
+                    return content;
+                } catch (e) {
+                    console.warn("Proxy attempt failed:", e);
                 }
-                // 다음 프록시로 넘어가기 전 충분한 휴식
-                await sleep(500);
             }
-            throw lastError || new Error("All proxy attempts failed");
+            throw new Error("모든 프록시 호출에 실패했습니다.");
         }
 
         async function fetchAllData() {
-            const key = document.getElementById('apiKey').value.trim() || DEFAULT_API_KEY;
-            if(!key) return alert("인증키를 입력하세요.");
+            const key = document.getElementById('apiKey').value.trim();
+            if(!key) {
+                alert("공공데이터포털 인증키(Encoding)를 입력해주세요.");
+                return;
+            }
 
-            const listContainer = document.getElementById('stockList');
             const statusTag = document.getElementById('updateStatus');
-            const welcomeTitle = document.getElementById('welcomeTitle');
-            const welcomeIcon = document.getElementById('welcomeIcon');
-
-            listContainer.innerHTML = '<div class="space-y-3 p-2">' + Array(5).fill('<div class="h-14 w-full loading-shimmer rounded-xl"></div>').join('') + '</div>';
-            statusTag.innerText = "Connecting...";
-            welcomeTitle.innerText = "SEQUENTIAL SYNCING...";
-            welcomeIcon.classList.add('animate-spin');
+            const listContainer = document.getElementById('stockList');
+            
+            listContainer.innerHTML = Array(5).fill('<div class="h-16 w-full loading-shimmer rounded-2xl mb-2"></div>').join('');
+            statusTag.innerText = "LOADING";
+            statusTag.className = "text-[10px] bg-indigo-100 px-2 py-1 rounded text-indigo-600 font-bold animate-pulse";
 
             const results = [];
-            // 병렬이 아닌 직렬(Sequential) 처리로 프록시 부하 방지
             for (const stock of watchlist) {
                 try {
-                    statusTag.innerText = `${stock.name} 수집 중...`;
+                    statusTag.innerText = `FETCHING: ${stock.name}`;
                     
-                    // 1. 시세 정보
-                    const pUrl = `https://apis.data.go.kr/1160100/service/GetStockSecuritiesDetailsInfoService/getStockPriceInfo?serviceKey=${key}&numOfRows=1&resultType=json&itmsNm=${encodeURIComponent(stock.name)}`;
-                    const pJson = await fetchWithProxyFailover(pUrl);
+                    // 1. 주식시세정보 (가이드: getStockSecuritiesInfoService)
+                    const pUrl = `https://apis.data.go.kr/1160100/service/getStockSecuritiesInfoService/getStockPriceInfo?serviceKey=${key}&numOfRows=1&resultType=json&itmsNm=${encodeURIComponent(stock.name)}`;
+                    const pJson = await fetchWithProxy(pUrl);
                     const pItem = pJson?.response?.body?.items?.item?.[0];
 
-                    if(pItem) {
-                        // 각 API 호출 사이에 명확한 간격(Throttle) 유지
-                        await sleep(1200); 
+                    if (pItem) {
+                        await sleep(500); // 가이드 권고에 따른 지연
 
-                        // 2. 발행주식수 정보
+                        // 2. 주식발행정보 (가이드: GetStocIssuInfoService_V2)
                         const iUrl = `https://apis.data.go.kr/1160100/service/GetStocIssuInfoService_V2/getItemIssuInfo?serviceKey=${key}&numOfRows=1&resultType=json&itmsNm=${encodeURIComponent(stock.name)}`;
-                        const iJson = await fetchWithProxyFailover(iUrl);
+                        const iJson = await fetchWithProxy(iUrl);
                         const iItem = iJson?.response?.body?.items?.item?.[0];
 
-                        await sleep(1200);
+                        await sleep(500);
 
-                        // 3. 요약 재무 제표
+                        // 3. 기업 재무정보 (가이드: GetFinaStatInfoService_V2)
+                        // 법인등록번호(crno)를 기반으로 조회
                         const fUrl = `https://apis.data.go.kr/1160100/service/GetFinaStatInfoService_V2/getSummFinaStat_V2?serviceKey=${key}&numOfRows=5&resultType=json&crno=${pItem.crno}`;
-                        const fJson = await fetchWithProxyFailover(fUrl);
+                        const fJson = await fetchWithProxy(fUrl);
                         const fItems = fJson?.response?.body?.items?.item || [];
+                        // 가장 최근 년도(bizYear) 데이터 추출
                         const latestFin = Array.isArray(fItems) ? fItems.sort((a,b) => b.bizYear - a.bizYear)[0] : fItems;
 
                         results.push({
                             ...pItem,
-                            totalStockQty: iItem ? iItem.lstgStknCnt : (pItem.lstgStknCnt || "0"),
-                            netProfit: latestFin ? (latestFin.thstNmNetProfit || "0") : "0",
-                            totalEquity: latestFin ? (latestFin.thstNmEquity || "0") : "0",
-                            bizYear: latestFin ? latestFin.bizYear : "2024"
+                            totalStockQty: iItem ? iItem.lstgStknCnt : pItem.lstgStknCnt,
+                            netProfit: latestFin ? latestFin.thstNmNetProfit : "0",
+                            totalEquity: latestFin ? latestFin.thstNmEquity : "0",
+                            bizYear: latestFin ? latestFin.bizYear : "-"
                         });
-
-                        // 성공할 때마다 리스트 갱신하여 사용자 피드백 제공
                         renderList(results);
                     }
-                } catch(e) { 
-                    console.error(`${stock.name} 최종 실패:`, e.message); 
+                } catch (e) {
+                    console.error(`${stock.name} 데이터 로드 실패:`, e);
                 }
-                // 종목 간 이동 시 긴 휴식 (프록시 차단 방지)
-                await sleep(1500); 
             }
 
-            welcomeIcon.classList.remove('animate-spin');
             if(results.length > 0) {
                 showDetail(results[0]);
-                statusTag.innerText = "Sync Success";
-                welcomeTitle.innerText = "SYNC COMPLETE";
+                statusTag.innerText = "ONLINE";
+                statusTag.className = "text-[10px] bg-green-100 px-2 py-1 rounded text-green-600 font-bold";
             } else {
-                statusTag.innerText = "Sync Failed";
-                welcomeTitle.innerText = "CONNECTION TIMEOUT";
-                listContainer.innerHTML = '<p class="p-4 text-xs text-rose-500 font-bold text-center">네트워크 혼잡으로 인해 데이터를 가져오지 못했습니다. 잠시 후 [분석 시작]을 다시 눌러주세요.</p>';
+                statusTag.innerText = "ERROR";
+                statusTag.className = "text-[10px] bg-red-100 px-2 py-1 rounded text-red-600 font-bold";
+                listContainer.innerHTML = '<div class="text-[10px] text-red-500 text-center py-10">404 에러 혹은 인증키 오류.<br>네트워크 탭을 확인하세요.</div>';
             }
         }
 
@@ -292,13 +249,13 @@
             items.forEach(item => {
                 const fltRt = parseFloat(item.fltRt);
                 const itemDiv = document.createElement('div');
-                itemDiv.className = "sidebar-item glass-card p-4 rounded-2xl cursor-pointer bg-white mb-2 shadow-sm border border-slate-100 flex justify-between items-center";
+                itemDiv.className = "sidebar-item glass-card p-4 rounded-2xl cursor-pointer bg-white mb-2 shadow-sm flex justify-between items-center";
                 itemDiv.innerHTML = `
-                    <div>
-                        <div class="font-black text-slate-800 text-sm tracking-tighter">${item.itmsNm}</div>
-                        <div class="text-[9px] text-slate-400 font-mono tracking-tighter">${item.srtnCd}</div>
+                    <div class="overflow-hidden">
+                        <div class="font-black text-slate-800 text-sm truncate">${item.itmsNm}</div>
+                        <div class="text-[9px] text-slate-400 font-mono">${item.srtnCd}</div>
                     </div>
-                    <div class="text-right">
+                    <div class="text-right flex-shrink-0 ml-2">
                         <div class="font-bold text-sm ${fltRt >= 0 ? 'text-rose-500' : 'text-blue-600'}">₩${parseInt(item.clpr).toLocaleString()}</div>
                         <div class="text-[10px] font-black ${fltRt >= 0 ? 'text-rose-400' : 'text-blue-400'}">${fltRt > 0 ? '+' : ''}${fltRt}%</div>
                     </div>`;
@@ -319,12 +276,14 @@
 
             document.getElementById('targetName').innerText = item.itmsNm;
             document.getElementById('targetCode').innerText = item.srtnCd;
+            document.getElementById('marketTag').innerText = item.mrktCtg;
             document.getElementById('targetPrice').innerText = price.toLocaleString();
             
             const fltRt = parseFloat(item.fltRt);
             document.getElementById('priceChange').innerText = `${fltRt > 0 ? '▲' : '▼'}${Math.abs(item.vs)} (${fltRt}%)`;
-            document.getElementById('priceChange').className = `text-lg font-bold mt-2 ${fltRt >= 0 ? 'text-rose-500' : 'text-blue-600'}`;
+            document.getElementById('priceChange').className = `text-xl font-bold mt-1 ${fltRt >= 0 ? 'text-rose-500' : 'text-blue-600'}`;
 
+            // PER, PBR, ROE 계산 (재무 데이터 단위는 원 단위로 가정)
             const per = netProfit > 0 ? (Number(marketCap) / netProfit).toFixed(2) : "N/A";
             const pbr = equity > 0 ? (Number(marketCap) / equity).toFixed(2) : "N/A";
             const roe = equity > 0 ? ((netProfit / equity) * 100).toFixed(1) : "0.0";
@@ -339,40 +298,42 @@
 
             document.getElementById('aiAnalysis').innerHTML = `
                 <div class="space-y-4">
-                    <div class="border-l-4 border-indigo-500 pl-4">
-                        <p class="text-white font-black text-lg">${item.itmsNm} AI 가치 분석</p>
-                        <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Data Source: 공공데이터포털 (${item.bizYear})</p>
+                    <div class="flex items-center gap-2 border-b border-slate-700 pb-3 mb-2">
+                        <span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
+                        <p class="text-white font-black text-lg uppercase">${item.itmsNm} 분석 리포트</p>
                     </div>
-                    <div class="text-slate-300 leading-relaxed text-sm">
-                        기업 <b>${item.itmsNm}</b>의 시가총액은 <b>${document.getElementById('valMarketCap').innerText}</b> 규모입니다. 
-                        재무 지표 분석 결과, ROE <b>${roe}%</b>를 기록하며 수익성을 ${parseFloat(roe) > 10 ? '확보' : '추적'} 중입니다. 
-                        현재 PBR <b>${pbr}배</b>는 시장 참여자들이 해당 기업의 순자산 가치를 어떻게 평가하고 있는지 보여줍니다.
+                    <div class="text-slate-400 space-y-4 font-normal leading-relaxed">
+                        <p>기준 사업연도: <span class="text-white">${item.bizYear}년</span></p>
+                        <p><span class="text-white font-bold">${item.itmsNm}</span>의 시가총액은 <span class="text-indigo-400 font-bold">${document.getElementById('valMarketCap').innerText}</span> 수준입니다.</p>
+                        <div class="bg-slate-800 p-4 rounded-xl text-xs border-l-4 border-indigo-500">
+                            <i class="fa-solid fa-circle-info text-indigo-400 mr-1"></i>
+                            당기순이익(<span class="text-white">${(netProfit/100000000).toFixed(0)}억</span>)과 자본총계(<span class="text-white">${(equity/100000000).toFixed(0)}억</span>)를 바탕으로 분석한 결과, 
+                            PBR이 <span class="text-white">${pbr}배</span>로 ${parseFloat(pbr) < 1.0 ? '청산가치 미만의 <span class="text-rose-400 font-bold">저평가 상태</span>' : '적정 가치가 반영된 상태'}입니다.
+                        </div>
                     </div>
                 </div>
             `;
 
+            renderTradingView(item.srtnCd);
+        }
+
+        function renderTradingView(symbolCode) {
             document.getElementById('tv_chart_container').innerHTML = '';
             new TradingView.widget({
                 "autosize": true,
-                "symbol": `KRX:${item.srtnCd}`,
+                "symbol": `KRX:${symbolCode}`,
                 "interval": "D",
+                "timezone": "Asia/Seoul",
                 "theme": "light",
-                "container_id": "tv_chart_container",
-                "locale": "kr",
                 "style": "1",
-                "toolbar_bg": "#f1f5f9",
-                "enable_publishing": false,
-                "hide_top_toolbar": false,
-                "save_image": false
+                "locale": "kr",
+                "container_id": "tv_chart_container"
             });
         }
 
         window.onload = () => {
-            const savedKey = localStorage.getItem('krx_api_key_v2');
+            const savedKey = localStorage.getItem('krx_api_key_v3');
             if(savedKey) document.getElementById('apiKey').value = savedKey;
-            if(document.getElementById('apiKey').value || DEFAULT_API_KEY) {
-                setTimeout(fetchAllData, 1000);
-            }
         };
     </script>
 </body>
